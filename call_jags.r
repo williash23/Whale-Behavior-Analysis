@@ -17,13 +17,10 @@
 						state_index=state_index)
 						
 		inits <- function(){
-			list("mu_phi" = runif(1, -1, 1),
-				 "mu_p" =   runif(1, -1, 1), 
-				 "beta1" =  runif(1, -5, 5),
-				 "beta2" =  runif(1, -5, 5),
-				 "beta3" =  runif(1, -5, 5),
-				 "beta4" =  runif(1, -5, 5),
-				 "z" =  z.init(n_ind=n_ind, first_occ=first_occ, n_prim=n_prim)) # Latent (true) state of individual i at time t
+			list("pT" = runif(1, -1, 1),
+				 "pS"=   runif(1, -1, 1), 
+				 "alpha" =  runif(1, -5, 5),
+				 ) # Latent (true) state of individual i at time t
 		}
 		
 	

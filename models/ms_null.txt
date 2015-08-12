@@ -1,6 +1,7 @@
 		# Sara Williams
 		# 7/20/2015
 		# Assess whale_behavior before, during and after Closest Point of Approach (CPA)
+		# Based on formulation from Gimenez et al. 2012
 		# Model script
 ################################################################################# 
  sink("ms_null.txt")
@@ -11,8 +12,8 @@
         #   2 = seen in stationary mode
 		
 		#  States
-        #   T = transit mode
-        #   S = stationary mode
+        #   T = transit mode (1)
+        #   S = stationary mode (2)
 
 	   #  Parameters
 	   #   pT: detection prob. of individuals in transit mode
@@ -40,7 +41,7 @@
 			px0[1] <- piT
 			px0[2] <- 1-piT
 		
-			#  Probabilities of observations at a given occasion given state at that same occasion.
+			#  Probabilities of observations at a given occasion given true state at that same occasion.
 			po[1,1] <- 1 - pT
 			po[1,2] <- pT
 		
@@ -55,7 +56,7 @@
 			for(t in 2:n_occ)){ # loop over time, starting at 2nd encounter occasion
 			
 			#  Probabilities of states at a given occasion given states at previous occasion.
-			#   Uses multinomial logit for the transition probabilities between movement mode states.
+			#   Uses binomial logit for the transition probabilities between movement mode states.
 			px[1,i,t-1,1] <- 1/(1+exp(alpha[1,1])+exp(alpha[1,2]))
 			px[1,i,t-1,2] <- exp(alpha[1,1])/(1+exp(alpha[1,1])+exp(alpha[1,2]))
 		
@@ -63,11 +64,13 @@
 			px[2,i,t-1,2] <- 1/(1+exp(alpha[2,1])+exp(alpha[2,2]))
 			
 		#  STATE EQUATIONS
-		#   Draw states at t given states at t-1.
+		
+			#   Draw states at t given states at t-1.
 			enc ~ dcat(px[enc[i,t-1],i,t-1,1:2])
 		
 		#  OBSERVATION EQUATIONS
-		#   Draw observations at t given states at t.
+		
+			#   Draw observations at t given states at t.
 			enc[i,t] ~ dcat(po[enc[i,t],1:2])
 	
 		#  PRIORS
@@ -81,11 +84,11 @@
 				}
 			}
 		
-			#  For each individual, store its state.
-			for(i in 1:n_ind){ # Number of individuals
-				for(t in 1:n_occ[i]) # Number of occasions for each individual
-					move_mode[state_index[i,t]] <- enc[i,t]
-				}
+			#  For each individual, store its state. ### From Gimenez --- I don't think I need this.
+			# for(i in 1:n_ind){ # Number of individuals
+				# for(t in 1:n_occ[i]) # Number of occasions for each individual
+					# move_mode[state_index[i,t]] <- enc[i,t]
+				# }
 			}
 			
 		} # End

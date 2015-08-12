@@ -1,0 +1,68 @@
+################################################################################
+      sink("ms.txt")
+      cat("
+      model{
+        #  Priors
+        #  Survival
+        alpha[1] <- 0
+        #  Hunting Mortality
+        alpha[2] ~ dunif(-10, 10)
+        #  Other Mortality
+        alpha[3] ~ dunif(-10, 10)
+
+        log(psi[1]) <- 0 # first overall survival
+        log(psi[2]) <- alpha[2] # last hunting mortality
+        log(psi[3]) <- alpha[3] # first natural mortality
+        #  Probability of survival, death by hunting and death by other
+        phi <- psi[1]/sum(psi[])
+        hmort <- psi[2]/sum(psi[])
+        nmort <- psi[3]/sum(psi[])
+        #  Annual Rates
+        ann.phi <- phi ^ 12
+        ann.hmort <- 1 - (1 - hmort) ^ 12
+        ann.nmort <- 1 - (1 - nmort) ^ 12
+
+        # STATE Indices
+        # First index = state at time t-1
+        # Second index = individual (i)
+        # Third index = time (t)
+        # Fourth index = state at time t
+        # STATE Codes
+        # 1 alive
+        # 2 dead, harvested
+        # 3 dead, not harvested
+        # 4 dead, long time
+        ##################################
+        # DEFINE PARAMETERS
+        	for (i in 1:nind){
+        		for (t in first[i]:(last[i]-1)){
+        			# Probability of X(t) given X(t-1)
+        			px[1,i,t,1] <- phi
+        			px[1,i,t,2] <- hmort
+        			px[1,i,t,3] <- nmort
+        			px[1,i,t,4] <- 0
+        			px[2,i,t,1] <- 0
+        			px[2,i,t,2] <- 0
+        			px[2,i,t,3] <- 0
+        			px[2,i,t,4] <- 1
+        			px[3,i,t,1] <- 0
+        			px[3,i,t,2] <- 0
+        			px[3,i,t,3] <- 0
+        			px[3,i,t,4] <- 1
+        			px[4,i,t,1] <- 0
+        			px[4,i,t,2] <- 0
+        			px[4,i,t,3] <- 0
+        			px[4,i,t,4] <- 1
+        		}
+        	}
+
+        	#  Likelihood
+        	for(i in 1:nind){  #  Loop over individuals
+            for(t in (first[i]+1):last[i]){  #  Loop over time
+        			y[i,t] ~ dcat(px[y[i,t-1],i,t-1,1:4])
+        		} # t
+       		} # i
+
+      	}  # End Model
+      ",fill=TRUE)
+      sink()

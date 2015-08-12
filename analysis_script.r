@@ -9,13 +9,12 @@
 	
 		# Call models
 		mod_name <- ms_null
-		parameters <- c("")
-		fit <- call_jags("",
+		parameters <- c("pT","pS","alpha")
+		fit <- call_jags("ms_null.txt",
 					ni = 30000,
 					nt = 2,
 					nb = 15000,
 					nc = 3,
-					debug_mode = F,
 					return_fit = T)		
 			fit
 			mcmcplot(fit)
