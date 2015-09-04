@@ -4,6 +4,7 @@
 		# Based on formulation from Servanty and Gimenez 2010
 		# Model script
 ################################################################################# 
+ 
  sink("ms_Servanty.txt")
 cat("
       model{
