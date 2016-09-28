@@ -1,92 +1,91 @@
-		# Sara Williams
-		# 7/20/2015
-		# Assess whale_behavior before, during and after Closest Point of Approach (CPA)
-		# Based on formulation from Kery and Schaub 2012
-		# Model script
+    # Sara Williams
+    # 9/12/16
+    # Assess whale_behavior before, during and after Closest Point of Approach (CPA)
+    # Based on formulation from Kery and Schaub 2012
+    # Model script
 ################################################################################# 
  sink("ms_alt.txt")
       cat("
 
-	   #  Parameters
-	   #   phiT: probability of being in transit (initially?) 
-	   #   phiS: probability of being stationary (initially?) 
-	   #   psiTS: transition probability transit to stationary
-	   #   psiST: transition probability stationary to transit
-				
-				#  Detection probability is also often estimated in MS models.
-				#   But, since I have no "not seen" events/observations, 
-				#   there is no detection probability associated with my data.
-				#   pT: detection prob. of individuals in transit mode
-				#   pS: detection prob. of individuals in stationary mode
-				
-		     
-	    #  States
+     #  Parameters
+     #   phiT: probability of being in transit (initially?) 
+     #   phiS: probability of being stationary (initially?) 
+     #   psiTS: transition probability transit to stationary
+     #   psiST: transition probability stationary to transit
+        
+        #  Detection probability is also often estimated in MS models.
+        #   Use detection probabilities from Williams et al. 2016.
+        #   pT: detection prob. of individuals in transit mode
+        #   pS: detection prob. of individuals in stationary mode
+        
+         
+      #  States
         #   1 = in transit mode
         #   2 = in stationary mode
-		
-				#  Uncertainty in state assignment ??? Create "artificial" uncertainty within data?
-				#   Still only 2 states, but 4 possible events:
-				#   1 = seen in transit and assigned in transit (correctly)
-				#   2 = seen in transit and assigned in stationary (incorrectly)
-				#   3 = seen in stationary and assigned in stationary (correctly)
-				#   4 = seen in stationary and assigned in transit (incorrectly)
-		
-		
-		#  Observations
+    
+        #  Uncertainty in state assignment ??? Create "artificial" uncertainty within data?
+        #   Still only 2 states, but 4 possible events:
+        #   1 = seen in transit and assigned in transit (correctly)
+        #   2 = seen in transit and assigned in stationary (incorrectly)
+        #   3 = seen in stationary and assigned in stationary (correctly)
+        #   4 = seen in stationary and assigned in transit (incorrectly)
+    
+    
+    #  Observations
         #   1 = seen in transit mode 
         #   2 = seen in stationary mode
-		
-		#  STATE Indices
+    
+    #  STATE Indices
         #   First index = state at time t-1 (departure state)
         #   Second index = individual (i)
         #   Third index = time (t)
         #   Fourth index = state at time t (arrival state)
         
-	model{
+  model{
        
-	    #  Priors and constraints
-		for(u in 1:2){
-				#  Prior for mean probability of  initially being in transit or stationary mode
-				#  Prior for mean transitions
-		}
-		
-			#  Coefficients for the baseline category constrained to zero?????
-			
-				
-		#  Likelihood
-		for (t in 1:n_occ){
-				phiT[t] <- beta1 + beta2 * dist_to_shore[t]
-				phiS[t]) <- beta1 + beta2 * dist_to_shore[t]
-				psiST[t] <- alpha1 + alpha2 * dist_to_ship[t]
-				psiTS[t] <- alpha1 + alpha2 * dist_to_ship[t]
-			}
-		}	
-		
-		
-		#  Define state-transition matrix
-		#   An observation matrix is also usually defined in MS models.
-		#   But, since I have no "not seen" events/observations, 
-		#   I have no need for a observation matrix than is different
-		#   than the state matrix. Perhaps this is where I can incorporate
-		#   state assignment uncertainty that is estimated in a separate model?
-		
-		for (i in 1:n_ind){				#  Loop over individuals
-			#  Define probabilities of state S(t+1) given S(t)
-			for(t in 1:(n_occ-1)){			#  Loop over sightings
-									# ps[1, i ,t,1] <- phiT[t] * (1-psiTS[t])			#  Probability of being in state T, then staying in state T
-									# ps[1, i ,t,2] <- phiT[t] * psiTS[t]					#  Probability of being in state T, then transitioning to state S
-									# ps[2, i ,t,1] <- phiS[t] * psiST[t]					#  Probability of being in state S, then transitioning to state T
-									# ps[2, i ,t,2] <- phiS[t] * (1-psiST[t])			#  Probability of being in state S, then staying in state S
-			}
-		}
-		
-		#  Likelihood
-        	for(i in 1:n_ind){  		#  Loop over individuals
-				for(t in 2:n_occ[i]){  			#  Loop over sightings
-        			y[i,t] ~ dcat(ps[y[i,t-1],i,t-1,1:2])
-        		} 
-       		} 
+      #  Priors and constraints
+    for(u in 1:2){
+        #  Prior for mean probability of  initially being in transit or stationary mode
+        #  Prior for mean transitions
+    }
+    
+      #  Coefficients for the baseline category constrained to zero?????
+      
+        
+    #  Likelihood
+    for (t in 1:n_occ){
+        phiT[t] <- beta1 + beta2 * dist_to_shore[t]
+        phiS[t]) <- beta1 + beta2 * dist_to_shore[t]
+        psiST[t] <- alpha1 + alpha2 * dist_to_ship[t]
+        psiTS[t] <- alpha1 + alpha2 * dist_to_ship[t]
+      }
+    }  
+    
+    
+    #  Define state-transition matrix
+    #   An observation matrix is also usually defined in MS models.
+    #   But, since I have no "not seen" events/observations, 
+    #   I have no need for a observation matrix than is different
+    #   than the state matrix. Perhaps this is where I can incorporate
+    #   state assignment uncertainty that is estimated in a separate model?
+    
+    for (i in 1:n_ind){        #  Loop over individuals
+      #  Define probabilities of state S(t+1) given S(t)
+      for(t in 1:(n_occ-1)){      #  Loop over sightings
+                  # ps[1, i ,t,1] <- phiT[t] * (1-psiTS[t])      #  Probability of being in state T, then staying in state T
+                  # ps[1, i ,t,2] <- phiT[t] * psiTS[t]          #  Probability of being in state T, then transitioning to state S
+                  # ps[2, i ,t,1] <- phiS[t] * psiST[t]          #  Probability of being in state S, then transitioning to state T
+                  # ps[2, i ,t,2] <- phiS[t] * (1-psiST[t])      #  Probability of being in state S, then staying in state S
+      }
+    }
+    
+    #  Likelihood
+          for(i in 1:n_ind){      #  Loop over individuals
+        for(t in 2:n_occ[i]){        #  Loop over sightings
+              y[i,t] ~ dcat(ps[y[i,t-1],i,t-1,1:2])
+            } 
+           } 
 
-      	}  
+        }  
       ",fill=TRUE)
       sink()

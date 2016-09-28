@@ -1,97 +1,97 @@
-		# Sara Williams
-		# 7/20/2015
-		# Assess whale_behavior before, during and after Closest Point of Approach (CPA)
-		# Based on formulation from Gimenez et al. 2012
-		# Model script
+    # Sara Williams
+    # 9/12/16
+    # Assess whale_behavior before, during and after Closest Point of Approach (CPA)
+    # Based on formulation from Gimenez et al. 2012
+    # Model script
 ################################################################################# 
  sink("ms_null.txt")
       cat("
      
-	    #  Observations  (what's in data)
+      #  Observations  (what's in data)
         #   1 = seen in transit mode
         #   2 = seen in stationary mode
-		
-		#  States
+    
+    #  States
         #   T = transit mode (1)
         #   S = stationary mode (2)
 
-	   #  Parameters
-	   #   pT: detection prob. of individuals in transit mode
-	   #   pS: detection prob. of detection in stationary mode
-	   #   piT: probability of being in initial state T
-				# Probability of being in initial state S = 1-piT
-	   #   psiTS: probability of transitioning from transit to stationary
-	   #   psiST: probability of transitioning from stationary to transit
-				#  Probability remaining in state is reference, so:
-				#   psiTT = 1 - psiTS
-				#   psiSS = 1 - psiST
-		
-		
-		#  STATE Indices
+     #  Parameters
+     #   pT: detection prob. of individuals in transit mode
+     #   pS: detection prob. of detection in stationary mode
+     #   piT: probability of being in initial state T
+        # Probability of being in initial state S = 1-piT
+     #   psiTS: probability of transitioning from transit to stationary
+     #   psiST: probability of transitioning from stationary to transit
+        #  Probability remaining in state is reference, so:
+        #   psiTT = 1 - psiTS
+        #   psiSS = 1 - psiST
+    
+    
+    #  STATE Indices
         #   First index = state at time t-1
         #   Second index = individual (i)
         #   Third index = time (t)
         #   Fourth index = state at time t
         
-	model{
+  model{
        
-		#  LIKELIHOOD
-			
-			#  Probability for each initial state.
-			px0[1] <- piT
-			px0[2] <- 1-piT
-		
-			#  Probabilities of observations at a given occasion given true state at that same occasion.
-			po[1,1] <- 1 - pT
-			po[1,2] <- pT
-		
-			po[2,1] <- 1-pS
-			po[2,2] <- pS
-	
-		for (i in 1:n_ind){ # loop over individuals
-		
-		#  Estimated probabilities of initial states are the proportions in each state at first encounter.
-		enc[i, 1]] ~ dcat(px0[1:2])
-		
-			for(t in 2:n_occ)){ # loop over time, starting at 2nd encounter occasion
-			
-			#  Probabilities of states at a given occasion given states at previous occasion.
-			#   Uses binomial logit for the transition probabilities between movement mode states.
-			px[1,i,t-1,1] <- 1/(1+exp(alpha[1,1])+exp(alpha[1,2]))
-			px[1,i,t-1,2] <- exp(alpha[1,1])/(1+exp(alpha[1,1])+exp(alpha[1,2]))
-		
-			px[2,i,t-1,1] <- exp(alpha[2,1])/(1+exp(alpha[2,1])+exp(alpha[2,2]))
-			px[2,i,t-1,2] <- 1/(1+exp(alpha[2,1])+exp(alpha[2,2]))
-			
-		#  STATE EQUATIONS
-		
-			#   Draw states at t given states at t-1.
-			enc ~ dcat(px[enc[i,t-1],i,t-1,1:2])
-		
-		#  OBSERVATION EQUATIONS
-		
-			#   Draw observations at t given states at t.
-			enc[i,t] ~ dcat(po[enc[i,t],1:2])
-	
-		#  PRIORS
-		
-			pT ~ dunif(0,1) # Detection probability of individual in transit mode.
-			pS ~ dunif(0,1) # Detection probability of individual in stationary mode.
-		
-			#  Transition probabilities --- binomial logit??
-			for(i in 1:2){
-				alpha[i] ~ dnorm(0,0.01)
-				}
-			}
-		
-			#  For each individual, store its state. ### From Gimenez --- I don't think I need this.
-			# for(i in 1:n_ind){ # Number of individuals
-				# for(t in 1:n_occ[i]) # Number of occasions for each individual
-					# move_mode[state_index[i,t]] <- enc[i,t]
-				# }
-			}
-			
-		} # End
-		
+    #  LIKELIHOOD
+      
+      #  Probability for each initial state.
+      px0[1] <- piT
+      px0[2] <- 1-piT
+    
+      #  Probabilities of observations at a given occasion given true state at that same occasion.
+      po[1,1] <- 1 - pT
+      po[1,2] <- pT
+    
+      po[2,1] <- 1-pS
+      po[2,2] <- pS
+  
+    for (i in 1:n_ind){ # loop over individuals
+    
+    #  Estimated probabilities of initial states are the proportions in each state at first encounter.
+    enc[i, 1]] ~ dcat(px0[1:2])
+    
+      for(t in 2:n_occ)){ # loop over time, starting at 2nd encounter occasion
+      
+      #  Probabilities of states at a given occasion given states at previous occasion.
+      #   Uses binomial logit for the transition probabilities between movement mode states.
+      px[1,i,t-1,1] <- 1/(1+exp(alpha[1,1])+exp(alpha[1,2]))
+      px[1,i,t-1,2] <- exp(alpha[1,1])/(1+exp(alpha[1,1])+exp(alpha[1,2]))
+    
+      px[2,i,t-1,1] <- exp(alpha[2,1])/(1+exp(alpha[2,1])+exp(alpha[2,2]))
+      px[2,i,t-1,2] <- 1/(1+exp(alpha[2,1])+exp(alpha[2,2]))
+      
+    #  STATE EQUATIONS
+    
+      #   Draw states at t given states at t-1.
+      enc ~ dcat(px[enc[i,t-1],i,t-1,1:2])
+    
+    #  OBSERVATION EQUATIONS
+    
+      #   Draw observations at t given states at t.
+      enc[i,t] ~ dcat(po[enc[i,t],1:2])
+  
+    #  PRIORS
+    
+      pT ~ dunif(0,1) # Detection probability of individual in transit mode.
+      pS ~ dunif(0,1) # Detection probability of individual in stationary mode.
+    
+      #  Transition probabilities --- binomial logit??
+      for(i in 1:2){
+        alpha[i] ~ dnorm(0,0.01)
+        }
+      }
+    
+      #  For each individual, store its state. ### From Gimenez --- I don't think I need this.
+      # for(i in 1:n_ind){ # Number of individuals
+        # for(t in 1:n_occ[i]) # Number of occasions for each individual
+          # move_mode[state_index[i,t]] <- enc[i,t]
+        # }
+      }
+      
+    } # End
+    
       ",fill=TRUE)
       sink()
