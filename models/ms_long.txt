@@ -1,0 +1,61 @@
+model{
+
+    #  States (and observations?)
+        #   1 = in transit behavior (1)
+        #   2 = in stationary behavior (2)
+
+     #  Parameters
+     #   phiT: prob. of individual being in transit behavior
+     #   phiS: prob. of individual being in stationary behavior
+     #   psiTS: probability of transitioning from transit to stationary
+     #   psiST: probability of transitioning from stationary to transit
+
+    #  Priors
+    for(u in 1:2){
+      mu_phi[u] ~ dunif(0, 1)
+      mu_psi[u] ~ dunif(0, 1)
+      #mu_p[u] ~ dunif(1, 1) #  constrain detection probability to 1
+      beta[u] ~ dunif(-5, 5)
+      alpha[u] ~ dunif(-5, 5)
+      gamma[u] ~ dunif(-5, 5)
+      }
+
+    #  Linear predictor
+    for(i in 1:n_obs){
+      logit(phiT[i]) <- mu_phi[1] + beta[1] * dist_to_shore[i]
+      logit(phiS[i]) <- mu_phi[2] + beta[2] * dist_to_shore[i]
+      logit(psiTS[i]) <- mu_psi[1] + alpha[1] * dist_to_ship[i] + gamma[1] * bear_to_ship[i]
+      logit(psiST[i]) <- mu_psi[2] + alpha[2] * dist_to_ship[i] + gamma[2] * bear_to_ship[i]
+      #logit(pT[i]) <- mean_p[1]
+      #logit(pS[i]) <- mean_p[2]
+      }
+    
+    #  State-transtion matrices 
+        #  STATE Indices
+        #   First index = state at time t
+        #   Second index = individual (i)
+        #   Third index = time (t)
+        #   Fourth index = state at time t+1
+     
+      for (i in 1:n_obs){
+        px[1, ind[i], occ[i], 1] <- phiT[i] * (1-psiTS[i])
+        px[1, ind[i], occ[i], 2] <- phiT[i] * psiTS[i]
+        px[2, ind[i], occ[i], 1] <- phiS[i] * psiST[i]
+        px[2, ind[i], occ[i], 2] <- phiS[i] * (1-psiST[i])
+        }
+
+    #  Likelihood
+    for(i in 1:n_ind){
+      for(j in 2:n_occ[i]){
+        eh[i, j] ~ dcat(px[eh[i, j-1], i, j, 1:2]) # make eh square
+        }
+       }
+
+}
+
+
+
+     #  How to incorporate detection probabilites? Missing data??
+     #  Need a third state and observation type
+     #    pT: recapture probability in transit behavior
+     #    pS: recpature prability in stationary behavior

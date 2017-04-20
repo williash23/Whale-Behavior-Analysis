@@ -1,6 +1,6 @@
     # Sara Williams
-    # 9/12/16
-    # Assess whale_behavior before, during and after Closest Point of Approach (CPA)
+    # 9/12/16; updated 11/15/16
+    # Assess changes in visually assigned whale behavior
     # Based on formulation from Gimenez et al. 2012
     # Model script
 ################################################################################# 
@@ -8,16 +8,16 @@
       cat("
      
       #  Observations  (what's in data)
-        #   1 = seen in transit mode
-        #   2 = seen in stationary mode
+        #   1 = seen in transit behavior
+        #   2 = seen in stationary behavior
     
     #  States
-        #   T = transit mode (1)
-        #   S = stationary mode (2)
+        #   1 = in transit behavior (1)
+        #   2 = in stationary behavior (2)
 
      #  Parameters
-     #   pT: detection prob. of individuals in transit mode
-     #   pS: detection prob. of detection in stationary mode
+     #   phiT: prob. of individual being in transit behavior
+     #   phiS: prob. of individual being in stationary behavior
      #   piT: probability of being in initial state T
         # Probability of being in initial state S = 1-piT
      #   psiTS: probability of transitioning from transit to stationary
@@ -33,7 +33,7 @@
         #   Third index = time (t)
         #   Fourth index = state at time t
         
-  model{
+  behaviorl{
        
     #  LIKELIHOOD
       
@@ -56,7 +56,7 @@
       for(t in 2:n_occ)){ # loop over time, starting at 2nd encounter occasion
       
       #  Probabilities of states at a given occasion given states at previous occasion.
-      #   Uses binomial logit for the transition probabilities between movement mode states.
+      #   Uses binomial logit for the transition probabilities between movement behavior states.
       px[1,i,t-1,1] <- 1/(1+exp(alpha[1,1])+exp(alpha[1,2]))
       px[1,i,t-1,2] <- exp(alpha[1,1])/(1+exp(alpha[1,1])+exp(alpha[1,2]))
     
@@ -75,8 +75,8 @@
   
     #  PRIORS
     
-      pT ~ dunif(0,1) # Detection probability of individual in transit mode.
-      pS ~ dunif(0,1) # Detection probability of individual in stationary mode.
+      pT ~ dunif(0,1) # Detection probability of individual in transit behavior.
+      pS ~ dunif(0,1) # Detection probability of individual in stationary behavior.
     
       #  Transition probabilities --- binomial logit??
       for(i in 1:2){
@@ -87,7 +87,7 @@
       #  For each individual, store its state. ### From Gimenez --- I don't think I need this.
       # for(i in 1:n_ind){ # Number of individuals
         # for(t in 1:n_occ[i]) # Number of occasions for each individual
-          # move_mode[state_index[i,t]] <- enc[i,t]
+          # move_behavior[state_index[i,t]] <- enc[i,t]
         # }
       }
       

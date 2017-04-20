@@ -1,0 +1,74 @@
+model{
+
+    #  States (and observations?)
+        #   1 = in transit behavior (1)
+        #   2 = in stationary behavior (2)
+
+     #  Parameters
+     #   phiT: prob. of individual being in transit behavior
+     #   phiS: prob. of individual being in stationary behavior
+     #   psiTS: probability of transitioning from transit to stationary
+     #   psiST: probability of transitioning from stationary to transit
+     
+     #  How to incorporate detection probabilites? Missing data??
+     #  Need a third state and observation type
+     #    pT: recapture probability in transit behavior
+     #    pS: recpature prability in stationary behavior
+
+    #  Priors
+    for(u in 1:2){
+      mu_phi[u] ~ dunif(0, 1)
+      mu_psi[u] ~ dunif(0, 1)
+      #mu_p[u] ~ dunif(1, 1) #  constrain detection probability to 1
+      beta[u] ~ dunif(0, 1)
+      alpha[u] ~ dunif(0, 1)
+      }
+
+    #  Linear predictor
+    for(i in 1:n_ind){
+      for(t in 1:n_occ[i]){
+        logit(phiT[i, t]) <- mu_phi[1] + beta[1] * dist_to_shore[i, t]
+        logit(phiS[t]) <- mu_phi[2] + beta[2] * dist_to_shore[i, t]
+        logit(psiTS[t]) <- mu_psi[1] + alpha[1] * dist_to_ship[i, t]
+        logit(psiST[t]) <- mu_psi[2] + alpha[2] * dist_to_ship[i, t]
+        #logit(pT[t]) <- mean_p[1]
+        #logit(pS[t]) <- mean_p[2]
+        }
+    }
+    #  State-transtion matrices 
+    #  STATE Indices
+        #   First index = state at time t
+        #   Second index = individual (i)
+        #   Third index = time (t)
+        #   Fourth index = state at time t+1
+
+      for(i in 1:n_ind){
+        for(t in 1:(n_occ[i]-1)){
+          px[1, i, t, 1] <- phiT[t] * (1-psiTS[t])
+          px[1, i, t, 2] <- phiT[t] * psiTS[t]
+          px[2, i, t, 1] <- phiS[t] * psiST[t]
+          px[2, i, t, 2] <- phiS[t] * (1-psiST[t])
+          
+          
+          ## Define proabilities of state S(t+1) given S(t)
+          #ps[1, i, t, 1] <- phiT[t] * (1-psiTS[t])
+          #ps[1, i, t, 2] <- phiT[t] * psiTS[t]
+          #ps[2, i, t, 1] <- phiS[t] * psiST[t]
+          #ps[2, i, t, 2] <- phiS[t] * (1-psiST[t])
+
+          ## Define proabilities of of observation O(t) given state S(t)
+          #po[1, i, t, 1] <- pT
+          #po[1, i, t, 2] <- 0
+          #po[2, i, t, 1] <- 0
+          #po[2, i, t, 2] <- pS
+          }
+        }
+
+    #  Likelihood
+          for(i in 1:n_ind){
+            for(t in 2:n_occ[i]){
+               z[i,t] ~ dcat(ps[z[i,t-1], i, t-1,])
+               eh[i,t] ~ dcat(po[z[i,t], i, t,])
+               }
+           }
+}

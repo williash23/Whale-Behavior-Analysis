@@ -34,35 +34,35 @@
         # 4 dead, long time
         ##################################
         # DEFINE PARAMETERS
-        	for (i in 1:nind){
-        		for (t in first[i]:(last[i]-1)){
-        			# Probability of X(t) given X(t-1)
-        			px[1,i,t,1] <- phi
-        			px[1,i,t,2] <- hmort
-        			px[1,i,t,3] <- nmort
-        			px[1,i,t,4] <- 0
-        			px[2,i,t,1] <- 0
-        			px[2,i,t,2] <- 0
-        			px[2,i,t,3] <- 0
-        			px[2,i,t,4] <- 1
-        			px[3,i,t,1] <- 0
-        			px[3,i,t,2] <- 0
-        			px[3,i,t,3] <- 0
-        			px[3,i,t,4] <- 1
-        			px[4,i,t,1] <- 0
-        			px[4,i,t,2] <- 0
-        			px[4,i,t,3] <- 0
-        			px[4,i,t,4] <- 1
-        		}
-        	}
+          for (i in 1:nind){
+            for (t in first[i]:(last[i]-1)){
+              # Probability of X(t) given X(t-1)
+              px[1,i,t,1] <- phi
+              px[1,i,t,2] <- hmort
+              px[1,i,t,3] <- nmort
+              px[1,i,t,4] <- 0
+              px[2,i,t,1] <- 0
+              px[2,i,t,2] <- 0
+              px[2,i,t,3] <- 0
+              px[2,i,t,4] <- 1
+              px[3,i,t,1] <- 0
+              px[3,i,t,2] <- 0
+              px[3,i,t,3] <- 0
+              px[3,i,t,4] <- 1
+              px[4,i,t,1] <- 0
+              px[4,i,t,2] <- 0
+              px[4,i,t,3] <- 0
+              px[4,i,t,4] <- 1
+            }
+          }
 
-        	#  Likelihood
-        	for(i in 1:nind){  #  Loop over individuals
+          #  Likelihood
+          for(i in 1:nind){  #  Loop over individuals
             for(t in (first[i]+1):last[i]){  #  Loop over time
-        			y[i,t] ~ dcat(px[y[i,t-1],i,t-1,1:4])
-        		} # t
-       		} # i
+              y[i,t] ~ dcat(px[y[i,t-1],i,t-1,1:4])
+            } # t
+           } # i
 
-      	}  # End Model
+        }  # End Model
       ",fill=TRUE)
       sink()

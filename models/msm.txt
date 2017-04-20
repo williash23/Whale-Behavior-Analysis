@@ -1,0 +1,54 @@
+model{
+
+    #  States (and observations?)
+        #   1 = in transit behavior (1)
+        #   2 = in stationary behavior (2)
+
+     #  Parameters
+     #   psiTS: probability of transitioning from transit to stationary
+     #   psiST: probability of transitioning from stationary to transit
+
+    #  Priors
+    for(u in 1:2){
+      mu[u] ~ dunif(0, 1)
+      beta[u] ~ dunif(-5, 5)
+      alpha[u] ~ dunif(-5, 5)
+      }
+      
+      #piT ~ dunif(0, 1)
+      
+    #  Linear predictor
+    for(i in 1:n_obs){
+      logit(psiTS[i]) <- mu[1] + alpha[1] * dist_to_ship[i] + beta[1] * bear_to_ship[i]
+      logit(psiST[i]) <- mu[2] + alpha[2] * dist_to_ship[i] + beta[2] * bear_to_ship[i]
+      }
+
+    #  State-transtion matrices 
+        #  STATE Indices
+        #   First index = state at time t
+        #   Second index = individual (i)
+        #   Third index = time (t)
+        #   Fourth index = state at time t+1S
+     
+      
+        #px0[1] <- piT 
+        #px0[2] <- 1 - piT  
+     
+      for (i in 1:n_obs){
+        px[1, ind[i], occ[i], 1] <- 1-psiTS[i] 
+        px[1, ind[i], occ[i], 2] <- psiTS[i] 
+        px[2, ind[i], occ[i], 1] <- psiST[i] 
+        px[2, ind[i], occ[i], 2] <- 1-psiST[i] 
+        }
+
+       
+       
+    #  Likelihood
+    for(i in 1:n_ind){
+      #eh[i,1] ~ dcat(px0[1:2])
+       for(j in 2:n_occ[i]){
+          eh[i, j] ~ dcat(px[eh[i, j-1], i, j, 1:2]) # make eh square
+          }
+       }
+
+}

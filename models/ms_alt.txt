@@ -81,11 +81,10 @@
     
     #  Likelihood
           for(i in 1:n_ind){      #  Loop over individuals
-        for(t in 2:n_occ[i]){        #  Loop over sightings
-              y[i,t] ~ dcat(ps[y[i,t-1],i,t-1,1:2])
+            z[i, 1] <- Y[i, 1]
+            for(t in 2:n_occ[i]){        #  Loop over sightings
+                y[i,t] ~ dcat(ps[y[i,t-1], i, t-1,])
             } 
            } 
 
-        }  
-      ",fill=TRUE)
-      sink()
+}
