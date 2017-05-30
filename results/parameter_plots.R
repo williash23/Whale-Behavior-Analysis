@@ -10,6 +10,7 @@ library(dplyr)
 library(tidyr)
 
 #  Read in data using data_prep script
+load("C:/Users/sara.williams/Documents/GitHub/Whale-Behavior-Analysis/results/msm_fit.RData")
 
 
 #  For scaled and centered dist to ship and bearing to ship, and transformed transition probability (not on real probability scale)
@@ -56,33 +57,40 @@ par(mar=c(5,5,4,2))
 #################################################################################
 
 # Distance to ship plot
-#  Get a single length for each individual, then calculate survival for mean_phi + 0*toe + beta2*length
 whale1 <- as.data.frame(dist_to_ship) %>%
                   arrange(dist_to_ship) %>%
-                 mutate(trans_TS = trans_mu_psi1 + alpha1 * dist_to_ship) %>%
+                  mutate(trans_TS = trans_mu_psi1 + alpha1 * dist_to_ship) %>%
+                  mutate(trans_TS_plog = plogis(trans_TS)) %>%
+                  mutate(or_TS = trans_TS_plog/(1-trans_TS_plog)) %>%
+                  mutate(log_or_TS = log(or_TS)) %>%
                   as.data.frame(.)
 
 plot(dist_to_ship, seq(0,1,length.out=length(dist_to_ship)), 
         type="n", 
-        ylim=c(0.00, 0.10),
-        xlim=c(-1.018, 4.4),
+        #ylim=c(0.00, 0.10),
+        ylim=c(-15, 2),
+        #xlim=c(-1.018, 4.4),
+        xlim=c(-5,10),
         xaxt="n",
         xlab = "Distance to ship (m)",
         ylab = "Transition probability", 
         cex.lab=1.5,
         cex.axis=1.5,
         bty="L")
-axis(1, at=c(-0.7726323, -0.1278009, 0.5172472, 1.160016, 1.805335, 2.45015, 3.091, 3.7364, 4.375), 
-        labels=c("1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000"), cex.axis = 1.25)
+#axis(1, at=c(-0.7726323, -0.1278009, 0.5172472, 1.160016, 1.805335, 2.45015, 3.091, 3.7364, 4.375), 
+#        labels=c("1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000"), cex.axis = 1.25)
 
 for (j in 1:n){
     iter_state <- iter_trans_psi1[keep[j]] + iter_alpha1[keep[j]] * dist_to_ship #+ iter_beta1[keep[j]] * dist_to_shore
-    lines(dist_to_ship, plogis(iter_state), col= grey(.9,.3))
+    iter_state_plog = plogis(iter_state)
+    or_iter_state =  iter_state_plog/(1-iter_state_plog)
+    log_or_iter_state = log(or_iter_state)
+    lines(dist_to_ship, plogis(log_or_iter_state), col= grey(.9,.3))
   }
 
          
 #  Add line for length and survival, scaled and centered
-lines(whale1$dist_to_ship, plogis(whale1$ trans_TS), col="grey40", lwd = 2)
+lines(whale1$dist_to_ship, plogis(whale1$log_or_TS), col="grey60", lwd = 2)
 #################################################################################
 
 
@@ -113,7 +121,7 @@ for (j in 1:n){
  
   
 #  Add line for length and survival, scaled and centered
-lines (whale2$bear_to_ship, plogis(whale2$ trans_TS), col="grey40", lwd = 2)
+lines (whale2$bear_to_ship, plogis(whale2$ trans_TS), col="grey60", lwd = 2)
 #################################################################################
 
 
